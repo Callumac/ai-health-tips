@@ -1,0 +1,35 @@
+
+
+name: Daily Tip Generator
+
+on:
+  schedule:
+    - cron: "0 4 * * *"  # Daily at 4 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-tip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Generator Script
+        run: npm run generate:tip
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Commit and Push Tip
+        run: |
+          git config --global user.name "auto-bot"
+          git config --global user.email "bot@aibot.com"
+          git add data/tip-today.json
+          git commit -m "update: new AI-generated tip"
+          git push
